@@ -381,20 +381,6 @@ class _TtsHomePageState extends State<TtsHomePage> {
               ),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'On-device voices • No cloud API required',
-                  style: theme.textTheme.titleMedium,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Now supports faster speech playback for quick listening and exports.',
-                  style: theme.textTheme.bodyMedium,
-                ),
-              ],
-            ),
           ),
           const SizedBox(height: 12),
           Card(
