@@ -67,7 +67,7 @@ class _TtsHomePageState extends State<TtsHomePage> {
   List<Map<String, String>> _voicesForLocale = const [];
   String _selectedLocale = _presets.first.locale;
   Map<String, String>? _selectedVoice;
-  double _speechRate = 0.46;
+  double _speechRate = 0.55;
   double _pitch = 1.0;
   bool _busy = false;
   String _status = 'Ready';
@@ -246,26 +246,56 @@ class _TtsHomePageState extends State<TtsHomePage> {
       (p) => p.locale == _selectedLocale,
       orElse: () => _presets.first,
     );
+    final theme = Theme.of(context);
+    final canSelectVoice = _voicesForLocale.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Native TTS Studio'),
+        centerTitle: true,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
-          Text(
-            'On-device voices • No cloud API required',
-            style: Theme.of(context).textTheme.titleMedium,
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  theme.colorScheme.primaryContainer,
+                  theme.colorScheme.secondaryContainer,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'On-device voices • No cloud API required',
+                  style: theme.textTheme.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Now supports faster speech playback for quick listening and exports.',
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _textController,
-            minLines: 5,
-            maxLines: 8,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Text to synthesize',
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: TextField(
+                controller: _textController,
+                minLines: 5,
+                maxLines: 8,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Text to synthesize',
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -283,7 +313,10 @@ class _TtsHomePageState extends State<TtsHomePage> {
                 .toList(),
           ),
           const SizedBox(height: 12),
-          Text('Selected accent: ${preset.region} (${preset.locale})'),
+          Text(
+            'Selected accent: ${preset.region} (${preset.locale})',
+            style: theme.textTheme.bodyMedium,
+          ),
           const SizedBox(height: 12),
           DropdownButtonFormField<Map<String, String>>(
             value: _selectedVoice,
@@ -299,7 +332,7 @@ class _TtsHomePageState extends State<TtsHomePage> {
                   ),
                 )
                 .toList(),
-            onChanged: _voicesForLocale.isEmpty
+            onChanged: !canSelectVoice
                 ? null
                 : (voice) async {
                     setState(() => _selectedVoice = voice);
@@ -309,14 +342,43 @@ class _TtsHomePageState extends State<TtsHomePage> {
                   },
           ),
           const SizedBox(height: 16),
-          Text('Speed (${_speechRate.toStringAsFixed(2)})'),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Speed (${_speechRate.toStringAsFixed(2)})',
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
+              Wrap(
+                spacing: 6,
+                children: [
+                  _SpeedChip(
+                    label: 'Normal',
+                    selected: _speechRate == 0.55,
+                    onTap: () => setState(() => _speechRate = 0.55),
+                  ),
+                  _SpeedChip(
+                    label: 'Fast',
+                    selected: _speechRate == 0.75,
+                    onTap: () => setState(() => _speechRate = 0.75),
+                  ),
+                  _SpeedChip(
+                    label: 'Max',
+                    selected: _speechRate == 1.0,
+                    onTap: () => setState(() => _speechRate = 1.0),
+                  ),
+                ],
+              ),
+            ],
+          ),
           Slider(
             value: _speechRate,
             min: 0.2,
-            max: 0.7,
+            max: 1.0,
             onChanged: (v) => setState(() => _speechRate = v),
           ),
-          Text('Pitch (${_pitch.toStringAsFixed(2)})'),
+          Text('Pitch (${_pitch.toStringAsFixed(2)})', style: theme.textTheme.titleSmall),
           Slider(
             value: _pitch,
             min: 0.6,
@@ -353,14 +415,44 @@ class _TtsHomePageState extends State<TtsHomePage> {
           const SizedBox(height: 12),
           Text(
             _status,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Tip: For the most natural voices on Samsung devices, keep Google Speech Services up to date and download offline voice packs in Android Settings.',
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Text(
+              'Tip: For the most natural voices on Samsung devices, keep Google Speech Services up to date and download offline voice packs in Android Settings.',
+            ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SpeedChip extends StatelessWidget {
+  const _SpeedChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
     );
   }
 }
