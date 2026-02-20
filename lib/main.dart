@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:ffmpeg_kit_flutter_min_gpl/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_min_gpl/return_code.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:intl/intl.dart';
@@ -53,7 +51,7 @@ class _TtsHomePageState extends State<TtsHomePage> {
   final FlutterTts _tts = FlutterTts();
   final TextEditingController _textController = TextEditingController(
     text:
-        'Hello! This is a natural, on-device text-to-speech demo. You can export this as WAV or MP3.',
+        'Hello! This is a natural, on-device text-to-speech demo. You can export this as WAV.',
   );
 
   static const List<AccentPreset> _presets = [
@@ -156,14 +154,11 @@ class _TtsHomePageState extends State<TtsHomePage> {
   }
 
   Future<void> _exportWav() async {
-    await _exportAudio(asMp3: false);
+    await _exportAudio();
   }
 
-  Future<void> _exportMp3() async {
-    await _exportAudio(asMp3: true);
-  }
 
-  Future<void> _exportAudio({required bool asMp3}) async {
+  Future<void> _exportAudio() async {
     final text = _textController.text.trim();
     if (text.isEmpty) {
       _showSnack('Cannot export empty text.');
@@ -172,7 +167,7 @@ class _TtsHomePageState extends State<TtsHomePage> {
 
     setState(() {
       _busy = true;
-      _status = asMp3 ? 'Exporting MP3...' : 'Exporting WAV...';
+      _status = 'Exporting WAV...';
     });
 
     try {
@@ -188,28 +183,8 @@ class _TtsHomePageState extends State<TtsHomePage> {
         throw Exception('TTS engine did not generate WAV file.');
       }
 
-      if (!asMp3) {
-        await _shareFile(wavFile);
-        setState(() => _status = 'WAV exported: ${wavFile.path}');
-        return;
-      }
-
-      final mp3Path = '${dir.path}/tts_$timestamp.mp3';
-      final session = await FFmpegKit.execute(
-        '-y -i "$wavPath" -codec:a libmp3lame -q:a 2 "$mp3Path"',
-      );
-      final rc = await session.getReturnCode();
-      if (!ReturnCode.isSuccess(rc)) {
-        throw Exception('MP3 conversion failed (code: $rc).');
-      }
-
-      final mp3File = File(mp3Path);
-      if (!await mp3File.exists()) {
-        throw Exception('MP3 file not found after conversion.');
-      }
-
-      await _shareFile(mp3File);
-      setState(() => _status = 'MP3 exported: ${mp3File.path}');
+      await _shareFile(wavFile);
+      setState(() => _status = 'WAV exported: ${wavFile.path}');
     } catch (e) {
       setState(() => _status = 'Error: $e');
       _showSnack('Export failed: $e');
@@ -404,11 +379,6 @@ class _TtsHomePageState extends State<TtsHomePage> {
                 onPressed: _busy ? null : _exportWav,
                 icon: const Icon(Icons.audio_file_outlined),
                 label: const Text('Export WAV'),
-              ),
-              FilledButton.tonalIcon(
-                onPressed: _busy ? null : _exportMp3,
-                icon: const Icon(Icons.library_music_outlined),
-                label: const Text('Export MP3'),
               ),
             ],
           ),

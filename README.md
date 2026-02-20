@@ -1,6 +1,6 @@
 # Native TTS Studio (Flutter)
 
-A Flutter app focused on **natural on-device text-to-speech** with accent presets and export to both **WAV** and **MP3**.
+A Flutter app focused on **natural on-device text-to-speech** with accent presets and export to **WAV**.
 
 ## Features
 
@@ -14,7 +14,7 @@ A Flutter app focused on **natural on-device text-to-speech** with accent preset
 - Voice picker for each locale (uses voices exposed by the Android TTS engine).
 - Adjustable speed + pitch.
 - Export to WAV from native TTS synthesis.
-- Convert WAV to MP3 with FFmpeg and share generated files.
+- Share generated WAV files directly.
 
 ## Why this matches your Samsung S22 testing goal
 
@@ -34,5 +34,4 @@ Samsung S22 supports modern Android TTS engines (Samsung/Google). Naturalness de
 ## Notes
 
 - WAV export is generated directly by the native TTS engine.
-- MP3 export is produced locally by converting WAV with FFmpeg.
 - If a locale does not have a dedicated installed voice, Android falls back to a default voice.
